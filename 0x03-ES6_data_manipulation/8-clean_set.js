@@ -1,13 +1,11 @@
 // Define the function cleanSet
-export default function cleanSet(set, startString) {
+export default function cleanSet(set, string) {
   // Return an empty string if startString is empty
-  if (!startString || typeof startString !== 'string') {
+  if (string === undefined || string.length === 0) {
     return '';
   }
-
-  // Filter and map the set values that start with startString
-  return Array.from(set)
-    .filter((value) => value.startsWith(startString))
-    .map((value) => value.slice(startString.length))
+  return [...set]
+    .filter((str) => (str !== undefined ? str.startsWith(string) : ''))
+    .map((str) => (str !== undefined ? str.slice(string.length) : ''))
     .join('-');
 }
