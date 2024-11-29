@@ -1,17 +1,15 @@
 /**
- * AppController.js
- * @description: Controller for the App route of the API (GET '/')
- * @class AppController
- * @extends Controller
- * @method getHomepage: Method for the route GET '/'
- * @authors: Mosab Aboidrees
+ * Contains the miscellaneous route handlers.
  */
-
 class AppController {
-  static getHomepage(req, res) {
-    res.status(200).send('Hello Holberton School!');
+  /**
+   * Handles the homepage route.
+   * @param {Object} request - The HTTP request object.
+   * @param {Object} response - The HTTP response object.
+   */
+  static getHomepage(request, response) {
+    response.status(200).send('Hello Holberton School!');
   }
 }
 
 export default AppController;
-module.exports = AppController;

@@ -1,61 +1,72 @@
 import readDatabase from '../utils';
+
 /**
- * StudentsController class
- * @class StudentsController
- * @export StudentsController
- * @extends Controller
- * @description Class for StudentsController
+ * List of valid majors.
  */
+const VALID_MAJORS = ['CS', 'SWE'];
 
+/**
+ * Contains the student-related route handlers.
+ */
 class StudentsController {
-  static async getAllStudents(req, res) {
-    try {
-      const databasePath = process.argv[2];
-      const studentsByField = await readDatabase(databasePath);
+  /**
+   * Handles the /students endpoint.
+   * @param {Object} request - The HTTP request object.
+   * @param {Object} response - The HTTP response object.
+   */
+  static getAllStudents(request, response) {
+    const dataPath = process.argv.length > 2 ? process.argv[2] : '';
 
-      let response = 'This is the list of our students\n';
-      // A comparison function for ordering a list of strings in ascending
-      // order by alphabetic order and case insensitive
-      // const fields = Object.keys(studentsByField).sort((a, b) =>
-      //  a.toLowerCase().localeCompare(b.toLowerCase())
-      // );
-      const fields = (a, b) => {
-        if (a[0].toLowerCase() < b[0].toLowerCase()) {
-          return -1;
-        }
-        if (a[0].toLowerCase() > b[0].toLowerCase()) {
-          return 1;
-        }
-        return 0;
-      };
-      for (const field of fields) {
-        const students = studentsByField[field];
-        response += `Number of students in ${field}: ${students.length}. List: ${students.join(', ')}\n`;
-      }
+    readDatabase(dataPath)
+      .then((studentGroups) => {
+        const responseParts = ['This is the list of our students'];
 
-      res.status(200).send(response.trim());
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
+        // Custom sorting function for case-insensitive field names
+        const sortedFields = Object.entries(studentGroups).sort((a, b) => {
+          if (a[0].toLowerCase() < b[0].toLowerCase()) {
+            return -1;
+          }
+          if (a[0].toLowerCase() > b[0].toLowerCase()) {
+            return 1;
+          }
+          return 0;
+        });
+
+        for (const [field, group] of sortedFields) {
+          const studentList = group.map((student) => student.firstname).join(', ');
+          responseParts.push(`Number of students in ${field}: ${group.length}. List: ${studentList}`);
+        }
+
+        response.status(200).send(responseParts.join('\n'));
+      })
+      .catch((err) => {
+        response.status(500).send(err instanceof Error ? err.message : String(err));
+      });
   }
 
-  static async getAllStudentsByMajor(req, res) {
-    const { major } = req.params;
+  /**
+   * Handles the /students/:major endpoint.
+   * @param {Object} request - The HTTP request object.
+   * @param {Object} response - The HTTP response object.
+   */
+  static getAllStudentsByMajor(request, response) {
+    const dataPath = process.argv.length > 2 ? process.argv[2] : '';
+    const { major } = request.params;
 
-    if (major !== 'CS' && major !== 'SWE') {
-      res.status(500).send('Major parameter must be CS or SWE');
+    if (!VALID_MAJORS.includes(major)) {
+      response.status(500).send('Major parameter must be CS or SWE');
       return;
     }
 
-    try {
-      const databasePath = process.argv[2];
-      const studentsByField = await readDatabase(databasePath);
-
-      const students = studentsByField[major] || [];
-      res.status(200).send(`List: ${students.join(', ')}`);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
+    readDatabase(dataPath)
+      .then((studentGroups) => {
+        const group = studentGroups[major] || [];
+        const studentList = group.map((student) => student.firstname).join(', ');
+        response.status(200).send(`List: ${studentList}`);
+      })
+      .catch((err) => {
+        response.status(500).send(err instanceof Error ? err.message : String(err));
+      });
   }
 }
 

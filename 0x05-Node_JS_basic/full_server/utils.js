@@ -1,36 +1,49 @@
 import fs from 'fs';
 
 /**
- * Reads a CSV file and organizes students by field.
- * @param {string} path - Path to the CSV file.
- * @returns {Promise<Object>} - An object mapping fields to arrays of student first names.
+ * Reads the data of students in a CSV file.
+ * @param {string} dataPath - The path to the CSV file.
+ * @returns {Promise<object>} - A promise that resolves to an object where
+ * fields are keys, and values are arrays of student objects.
  */
-async function readDatabase(path) {
-  try {
-    const data = await fs.readFile(path, 'utf-8');
-    const lines = data.split('\n').filter((line) => line.trim() !== '');
-    const header = lines.shift();
-
-    if (!header || !lines.length) {
-      throw new Error('Database is empty or incorrectly formatted');
-    }
-
-    const studentsByField = {};
-    for (const line of lines) {
-      const [firstname, lastname, age, field] = line.split(',');
-
-      if (firstname && lastname && age && field) {
-        if (!studentsByField[field]) {
-          studentsByField[field] = [];
-        }
-        studentsByField[field].push(firstname);
-      }
-    }
-
-    return studentsByField;
-  } catch (error) {
-    throw new Error('Cannot load the database');
+const readDatabase = (dataPath) => new Promise((resolve, reject) => {
+  if (!dataPath) {
+    reject(new Error('Cannot load the database'));
+    return;
   }
-}
+
+  fs.readFile(dataPath, 'utf-8', (err, data) => {
+    if (err) {
+      reject(new Error('Cannot load the database'));
+      return;
+    }
+
+    const fileLines = data.trim().split('\n');
+    const studentGroups = {};
+
+    // Extract property names from the header line
+    const dbFieldNames = fileLines[0].split(',');
+    const studentPropNames = dbFieldNames.slice(0, dbFieldNames.length - 1);
+
+    // Process each student record
+    for (const line of fileLines.slice(1)) {
+      const studentRecord = line.split(',');
+      const studentPropValues = studentRecord.slice(0, studentRecord.length - 1);
+      const field = studentRecord[studentRecord.length - 1];
+
+      if (!studentGroups[field]) {
+        studentGroups[field] = [];
+      }
+
+      const studentEntries = studentPropNames.map((propName, idx) => [
+        propName,
+        studentPropValues[idx],
+      ]);
+      studentGroups[field].push(Object.fromEntries(studentEntries));
+    }
+
+    resolve(studentGroups);
+  });
+});
 
 export default readDatabase;
