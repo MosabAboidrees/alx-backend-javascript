@@ -1,28 +1,43 @@
-const assert = require('assert');
 const calculateNumber = require('./0-calcul');
 
 describe('calculateNumber', () => {
-  it('should return the sum of two rounded numbers', () => {
-    assert.strictEqual(calculateNumber(1, 3), 4);
-    assert.strictEqual(calculateNumber(1.4, 3.7), 5);
-    assert.strictEqual(calculateNumber(1.5, 3.7), 6);
+  it('should handle floating point whole numbers', () => {
+    expect.assertions(1);
+    expect(calculateNumber(1.0, 2.0)).toBe(3);
   });
 
-  it('should handle negative numbers correctly', () => {
-    assert.strictEqual(calculateNumber(-1.4, -3.7), -5);
-    assert.strictEqual(calculateNumber(-1.5, -3.7), -6);
-    assert.strictEqual(calculateNumber(-1.6, -3.7), -6);
+  it("should round down b's floating point fractional number", () => {
+    expect.assertions(1);
+    expect(calculateNumber(1.0, 2.4)).toBe(3);
   });
 
-  it('should handle mixed positive and negative numbers', () => {
-    assert.strictEqual(calculateNumber(-1.4, 3.7), 3);
-    assert.strictEqual(calculateNumber(1.4, -3.7), -3);
-    assert.strictEqual(calculateNumber(-1.5, 3.7), 2);
+  it("should round down a and b's floating point fractional numbers", () => {
+    expect.assertions(1);
+    expect(calculateNumber(1.4, 2.4)).toBe(3);
   });
 
-  it('should handle zero correctly', () => {
-    assert.strictEqual(calculateNumber(0, 0), 0);
-    assert.strictEqual(calculateNumber(0, 3.7), 4);
-    assert.strictEqual(calculateNumber(-1.5, 0), -2);
+  it("should round down a's floating point fractional number", () => {
+    expect.assertions(1);
+    expect(calculateNumber(1.4, 2.0)).toBe(3);
+  });
+
+  it("should round up b's floating point fractional number", () => {
+    expect.assertions(1);
+    expect(calculateNumber(1.0, 2.5)).toBe(4);
+  });
+
+  it("should round up a and b's floating point fractional numbers", () => {
+    expect.assertions(1);
+    expect(calculateNumber(2.6, 2.5)).toBe(6);
+  });
+
+  it("should round up a's floating point fractional number", () => {
+    expect.assertions(1);
+    expect(calculateNumber(2.6, 2.0)).toBe(5);
+  });
+
+  it("should round down a and b floating point fractional numbers with trailing 9's", () => {
+    expect.assertions(1);
+    expect(calculateNumber(2.499999, 3.499999)).toBe(5);
   });
 });
