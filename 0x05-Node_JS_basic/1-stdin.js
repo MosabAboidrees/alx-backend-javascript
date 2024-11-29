@@ -1,14 +1,27 @@
-#!/usr/bin/env node
+// Print the welcome message to the standard output
+process.stdout.write('Welcome to Holberton School, what is your name?\n');
 
-// Display the initial welcome message
-console.log('Welcome to Holberton School, what is your name?');
+// Check if the input is coming from a terminal (manual input)
+if (process.stdin.isTTY) {
+  // Set up an event listener to handle data entered by the user
+  process.stdin.on('data', (data) => {
+    // Print the user's name to the standard output
+    process.stdout.write(`Your name is: ${data.toString()}`);
+    // Exit the process after displaying the name
+    process.exit();
+  });
+} else {
+  // Handle the case where input is piped into the program
+  process.stdin.on('data', (data) => {
+    // Print the user's name to the standard output
+    process.stdout.write(`Your name is: ${data.toString()}`);
+    // Exit the process after displaying the name
+    process.exit();
+  });
 
-// Set up the stdin stream to read user input
-process.stdin.on('data', (data) => {
-  const name = data.toString().trim(); // Get the user input and remove trailing spaces
-  console.log(`Your name is: ${name}`);
-  if (!process.stdin.isTTY) { // Check if input is piped
-    console.log('This important software is now closing');
-  }
-  process.exit(); // End the process
-});
+  // Listen for the 'exit' event to print a closing message
+  process.on('exit', () => {
+    // Print the closing message when the program ends
+    process.stdout.write('This important software is now closing\n');
+  });
+}
